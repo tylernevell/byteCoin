@@ -36,7 +36,19 @@ struct CoinManager {
             
             //3. Give the session a task
             // when session completes networking and its task is complete, the session calls the completionHandler function
-            let task = session.dataTask(with: url, completionHandler: handle(data: response: error: ))
+            // IMPORTANT: autocomplete dataTask and hit enter when highlighting completionHandler to automatically create a closure
+            let task = session.dataTask(with: url) { (data, response, error) in
+                if error != nil {
+                    print(error!)
+                    return
+                }
+                
+                // unwrap data if safe to do so and print it out in "readable" format
+                if let safeData = data {
+                    let dataString = String(data: safeData, encoding: .utf8)
+                    print(dataString!)
+                }
+            }
             
             //4. start the task
             task.resume()
@@ -45,19 +57,7 @@ struct CoinManager {
         
         
     }
-    
-    func handle(data: Data?, response: URLResponse?, error: Error?) {
-        
-        if error != nil {
-            print(error!)
-            return
-        }
-        
-        if let safeData = data {
-            let dataString = String(data: safeData, encoding: .utf8)
-            print(dataString)
-        }
-    }
+
     
 //    func performRequest(with urlString: String) {
 //        //1. Create a URL
