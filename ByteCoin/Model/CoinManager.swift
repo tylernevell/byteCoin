@@ -9,7 +9,7 @@
 import Foundation
 
 protocol CoinManagerDelegate {
-    func didUpdateCurrency(_ coinManager: CoinManager)
+    func didUpdateCurrency(_ coinManager: CoinManager, coinData: CoinData)
     func didFailWithError(error: Error)
 }
 
@@ -45,8 +45,7 @@ struct CoinManager {
                 
                 // unwrap data if safe to do so and print it out in "readable" format
                 if let safeData = data {
-                    let dataString = String(data: safeData, encoding: .utf8)
-                    print(dataString!)
+                    self.parseJSON(safeData)
                 }
             }
             
@@ -58,48 +57,44 @@ struct CoinManager {
         
     }
 
+    func parseJSON(_ coinData: Data) -> Double? {
+
+        let decoder = JSONDecoder()
+        
+        do {
+            let decodedData = try decoder.decode(CoinData.self, from: coinData)
+            let price = decodedData.rate
+            print(decodedData.rate)
+            return price
+
+        } catch {
+            print(error)
+            //delegate?.didFailWithError(error: error)
+            return nil
+        }
+    }
     
-//    func performRequest(with urlString: String) {
-//        //1. Create a URL
-//        if let url = URL(string: urlString) {
-//            //2. Creat a URLSession
-//            let session = URLSession(configuration: .default)
-//
-//            //3. Give the Session a task
-//            let task = session.dataTask(with: url) { (data, response, error) in
-//                if error != nil {
-//                    self.delegate?.didFailWithError(error: error!)
-//                }
-//                if let safeData = data {
-//                    if let currency = self.parseJSON(safeData) {
-//                        self.delegate?.didUpdateCurrency(self, currency: currency)
-//                    }
-//                }
-//            }
-//
-//            //4. Start the task
-//            task.resume()
-//        }
-//    }
-//
-//    func parseJSON(_ weatherData: Data) -> WeatherModel? {
-//
-//        let decoder = JSONDecoder()
-//        do {
-//            let decodedData = try decoder.decode(WeatherData.self, from: weatherData)
-//            let id = decodedData.weather[0].id
-//            let temp = decodedData.main.temp
-//            let name = decodedData.name
-//
-//            let weather = WeatherModel(conditionId: id, cityName: name, temperature: temp)
-//
-//            return weather
-//
-//            //print(weather.temperatureString)
-//
-//        } catch {
-//            delegate?.didFailWithError(error: error)
-//            return nil
-//        }
-//    }
+    //    func performRequest(with urlString: String) {
+    //        //1. Create a URL
+    //        if let url = URL(string: urlString) {
+    //            //2. Creat a URLSession
+    //            let session = URLSession(configuration: .default)
+    //
+    //            //3. Give the Session a task
+    //            let task = session.dataTask(with: url) { (data, response, error) in
+    //                if error != nil {
+    //                    self.delegate?.didFailWithError(error: error!)
+    //                }
+    //                if let safeData = data {
+    //                    if let currency = self.parseJSON(safeData) {
+    //                        self.delegate?.didUpdateCurrency(self, currency: currency)
+    //                    }
+    //                }
+    //            }
+    //
+    //            //4. Start the task
+    //            task.resume()
+    //        }
+    //    }
+    //
 }
