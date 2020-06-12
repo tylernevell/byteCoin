@@ -9,7 +9,7 @@
 import Foundation
 
 protocol CoinManagerDelegate {
-    func didUpdateCurrency(_ coinManager: CoinManager, coinData: CoinData)
+    func didUpdateCurrency(_ coinManager: CoinManager, coinPrice: Double)
     func didFailWithError(error: Error)
 }
 
@@ -39,13 +39,17 @@ struct CoinManager {
             // IMPORTANT: autocomplete dataTask and hit enter when highlighting completionHandler to automatically create a closure
             let task = session.dataTask(with: url) { (data, response, error) in
                 if error != nil {
-                    print(error!)
+                    self.delegate?.didFailWithError(error: error!)
                     return
                 }
                 
                 // unwrap data if safe to do so and print it out in "readable" format
                 if let safeData = data {
-                    self.parseJSON(safeData)
+                    print("safeData assigned")
+                    if let coinPrice = self.parseJSON(safeData) {
+                        print("safeData parsed")
+                        self.delegate?.didUpdateCurrency(self, coinPrice: coinPrice)
+                    }
                 }
             }
             
@@ -63,13 +67,11 @@ struct CoinManager {
         
         do {
             let decodedData = try decoder.decode(CoinData.self, from: coinData)
-            let price = decodedData.rate
-            print(decodedData.rate)
-            return price
+            //print(decodedData.rate)
+            return decodedData.rate
 
         } catch {
-            print(error)
-            //delegate?.didFailWithError(error: error)
+            delegate?.didFailWithError(error: error)
             return nil
         }
     }
